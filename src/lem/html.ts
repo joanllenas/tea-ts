@@ -1,5 +1,7 @@
 import { $LemMessage } from './message';
 
+// TYPES
+
 export type Attr = {
   type: 'Attr';
   name: string;
@@ -16,8 +18,10 @@ export type Html<Msg> =
     }
   | { type: 'Text'; text: string };
 
-export function node<Msg, Tag extends keyof HTMLElementTagNameMap>(
-  tag: Tag,
+// DOM Factory functions
+
+export function node<Msg>(
+  tag: string,
   attributes: Attribute<Msg>[],
   children: Html<Msg>[]
 ): Html<Msg> {
@@ -29,12 +33,28 @@ export function node<Msg, Tag extends keyof HTMLElementTagNameMap>(
   };
 }
 
+export function div<Msg>(
+  attributes: Attribute<Msg>[],
+  children: Html<Msg>[]
+): Html<Msg> {
+  return node('div', attributes, children);
+}
+
+export function button<Msg>(
+  attributes: Attribute<Msg>[],
+  children: Html<Msg>[]
+): Html<Msg> {
+  return node('button', attributes, children);
+}
+
 export function text<Msg>(text: string): Html<Msg> {
   return {
     type: 'Text',
     text,
   };
 }
+
+// DOM Attribute factory functions
 
 export function attr(name: string, value: string | number | boolean): Attr {
   return {

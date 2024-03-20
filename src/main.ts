@@ -27,21 +27,15 @@ const update = (msg: Msg, model: Model): Model => {
 };
 
 const view = (model: Model): Html.Html<Msg> => {
-  return Html.node(
-    'div',
+  return Html.div(
     [],
     [
-      Html.node(
-        'button',
-        [Html.on<Msg>('click', { name: 'Increment', payload: 2 })],
+      Html.button(
+        [Html.on('click', { name: 'Increment', payload: 2 })],
         [Html.text('+')]
       ),
-      Html.node(
-        'button',
-        [Html.on<Msg>('click', { name: 'Decrement' })],
-        [Html.text('-')]
-      ),
-      Html.node('div', [], [Html.text('Count: ' + model.count)]),
+      Html.button([Html.on('click', { name: 'Decrement' })], [Html.text('-')]),
+      Html.div([], [Html.text('Count: ' + model.count)]),
     ]
   );
 };
