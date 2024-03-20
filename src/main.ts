@@ -1,5 +1,7 @@
 import './style.css';
-import { Lem, Html, Message } from './lem';
+import { Message } from './lem/message';
+import * as Html from './lem/html';
+import * as Lem from './lem/program';
 
 type Model = {
   count: number;
