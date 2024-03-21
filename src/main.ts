@@ -7,9 +7,7 @@ type Model = {
   count: number;
 };
 
-type Msg =
-  | Message<{ name: 'Increment'; payload: number }>
-  | Message<{ name: 'Decrement' }>;
+type Msg = Message<'Increment', number> | Message<'Decrement'>;
 
 const init = (): Model => ({
   count: 0,

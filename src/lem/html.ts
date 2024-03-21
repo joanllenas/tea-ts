@@ -1,5 +1,3 @@
-import { $LemMessage } from './message';
-
 // TYPES
 
 export type Attr = {
@@ -64,7 +62,7 @@ export function attr(name: string, value: string | number | boolean): Attr {
   };
 }
 
-export function on<Msg extends $LemMessage>(name: string, msg: Msg): Evt<Msg> {
+export function on<Msg>(name: string, msg: Msg): Evt<Msg> {
   return {
     type: 'Evt',
     name,

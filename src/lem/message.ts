@@ -1,2 +1,6 @@
-export type $LemMessage = { name: string; payload?: unknown };
-export type Message<T extends $LemMessage> = T;
+export type Message<
+  Name extends string,
+  Payload = undefined
+> = Payload extends undefined
+  ? { name: Name }
+  : { name: Name; payload: Payload };

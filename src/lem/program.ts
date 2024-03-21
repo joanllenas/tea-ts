@@ -9,7 +9,6 @@ import {
   VNode,
 } from 'snabbdom';
 import * as Html from './html';
-import { $LemMessage } from './message';
 
 const patch = init([
   attributesModule,
@@ -22,7 +21,7 @@ type Program = {
   run: (node: Element) => void;
 };
 
-export function sandbox<Model, Msg extends $LemMessage>(
+export function sandbox<Model, Msg>(
   init: () => Model,
   update: (msg: Msg, model: Model) => Model,
   view: (model: Model) => Html.Html<Msg>
