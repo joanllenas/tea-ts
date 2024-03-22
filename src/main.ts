@@ -38,4 +38,4 @@ const view = (model: Model): Html.Html<Msg> => {
   );
 };
 
-Lem.sandbox(init, update, view).run(document.getElementById('app')!);
+Lem.sandbox(init, update, view).run(document.getElementById('app-sandbox')!);

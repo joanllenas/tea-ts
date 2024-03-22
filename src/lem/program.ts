@@ -48,11 +48,11 @@ export function sandbox<Model, Msg>(
 
           // Attrs
           html.attributes.forEach((cur) => {
-            if (isEvent(cur)) {
+            if (Html.isEvent(cur)) {
               nodeData.on![cur.name] = () => {
                 loop(update(cur.msg, model));
               };
-            } else if (isAttr(cur)) {
+            } else if (Html.isAttr(cur)) {
               nodeData.attrs![cur.name] = cur.value;
             }
           });
@@ -71,11 +71,4 @@ export function sandbox<Model, Msg>(
       }
     },
   };
-}
-
-function isEvent<Msg>(attr: Html.Attribute<Msg>): attr is Html.Evt<Msg> {
-  return attr.type === 'Evt';
-}
-function isAttr<Msg>(attr: Html.Attribute<Msg>): attr is Html.Attr {
-  return attr.type === 'Attr';
 }

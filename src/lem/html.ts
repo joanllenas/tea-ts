@@ -69,3 +69,13 @@ export function on<Msg>(name: string, msg: Msg): Evt<Msg> {
     msg,
   };
 }
+
+// Utils
+
+export function isEvent<Msg>(attr: Attribute<Msg>): attr is Evt<Msg> {
+  return attr.type === 'Evt';
+}
+
+export function isAttr<Msg>(attr: Attribute<Msg>): attr is Attr {
+  return attr.type === 'Attr';
+}
