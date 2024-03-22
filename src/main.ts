@@ -22,6 +22,7 @@ const update = (msg: Msg, model: Model): Model => {
       return { count: model.count - 1 };
     }
   }
+  return model;
 };
 
 const view = (model: Model): Html.Html<Msg> => {
