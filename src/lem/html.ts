@@ -16,7 +16,23 @@ export type Html<Msg> =
     }
   | { type: 'Text'; text: string };
 
-// DOM Factory functions
+// HTML tags Factory functions
+
+function createTagFunction(tag: string) {
+  return function <Msg>(
+    attributes: Attribute<Msg>[],
+    children: Html<Msg>[]
+  ): Html<Msg> {
+    return node(tag, attributes, children);
+  };
+}
+
+export function text<Msg>(text: string): Html<Msg> {
+  return {
+    type: 'Text',
+    text,
+  };
+}
 
 export function node<Msg>(
   tag: string,
@@ -30,35 +46,42 @@ export function node<Msg>(
     children,
   };
 }
+export const div = createTagFunction('div');
+export const span = createTagFunction('span');
+export const h1 = createTagFunction('h1');
+export const h2 = createTagFunction('h2');
+export const h3 = createTagFunction('h3');
+export const h4 = createTagFunction('h4');
+export const h5 = createTagFunction('h5');
+export const h6 = createTagFunction('h6');
+export const button = createTagFunction('button');
+export const input = createTagFunction('input');
 
-export function div<Msg>(
-  attributes: Attribute<Msg>[],
-  children: Html<Msg>[]
-): Html<Msg> {
-  return node('div', attributes, children);
-}
+// HTML Attribute factory functions
 
-export function button<Msg>(
-  attributes: Attribute<Msg>[],
-  children: Html<Msg>[]
-): Html<Msg> {
-  return node('button', attributes, children);
-}
-
-export function text<Msg>(text: string): Html<Msg> {
-  return {
-    type: 'Text',
-    text,
+function createAttrFunction<Value extends string | number | boolean>(
+  name: string
+) {
+  return function (value: Value): Attr {
+    return attr(name, value);
   };
 }
-
-// DOM Attribute factory functions
 
 export function attr(name: string, value: string | number | boolean): Attr {
   return {
     type: 'Attr',
     name,
     value,
+  };
+}
+
+export const className = createAttrFunction<string>('class');
+
+// HTML Event factory functions
+
+function createEvtFunction(name: string) {
+  return function <Msg>(msg: Msg): Evt<Msg> {
+    return on(name, msg);
   };
 }
 
@@ -69,6 +92,8 @@ export function on<Msg>(name: string, msg: Msg): Evt<Msg> {
     msg,
   };
 }
+
+export const onClick = createEvtFunction('click');
 
 // Utils
 

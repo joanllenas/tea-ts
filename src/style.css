@@ -1,8 +1,30 @@
 body {
   margin: 0;
   display: flex;
+  flex-direction: column;
+  gap: 32px;;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   font-size: x-large;
+}
+
+.border-1 {
+  border: 1px solid black;
+}
+
+.padding-sm {
+  padding: 4px;
+}
+
+.padding-md {
+  padding: 8px;
+}
+
+.padding-lg {
+  padding: 16px;
+}
+
+.padding-xl {
+  padding: 32px;
 }
