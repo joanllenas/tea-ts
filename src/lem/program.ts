@@ -10,7 +10,6 @@ import {
 } from 'snabbdom';
 import * as Html from './html';
 import * as Effect from './effect';
-import { Message } from './message';
 
 const patch = init([
   attributesModule,
@@ -75,11 +74,7 @@ export function sandbox<Model, Msg>(
   };
 }
 
-export function element<
-  Model,
-  Msg extends Message<string>,
-  Eff extends Effect.Effect<string>
->(
+export function element<Model, Msg, Eff extends Effect.Effect<string>>(
   init: () => [Model, Eff],
   update: (msg: Msg, model: Model) => [Model, Eff],
   effects: (eff: Eff) => Effect.EffectFn<Msg>,

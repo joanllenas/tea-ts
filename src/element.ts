@@ -1,5 +1,5 @@
 import './style.css';
-import { Message } from './lem/message';
+import * as Message from './lem/message';
 import * as Effect from './lem/effect';
 import * as Html from './lem/html';
 
@@ -26,13 +26,20 @@ export const init = (): [Model, Eff] => [
 
 // UPDATE
 
+const Increment = Message.msg('Increment');
+const Decrement = Message.msg('Decrement');
+const GetIncrement = Message.msg('GetIncrement');
+const GotIncrement = (n: number) => Message.msg('GotIncrement', n);
+const GetDecrement = Message.msg('GetDecrement');
+const GotDecrement = (n: number) => Message.msg('GotDecrement', n);
+
 type Msg =
-  | Message<'Increment'>
-  | Message<'Decrement'>
-  | Message<'GetIncrement'>
-  | Message<'GotIncrement', number>
-  | Message<'GetDecrement'>
-  | Message<'GotDecrement', number>;
+  | typeof Increment
+  | typeof Decrement
+  | typeof GetIncrement
+  | ReturnType<typeof GotIncrement>
+  | typeof GetDecrement
+  | ReturnType<typeof GotDecrement>;
 
 export const update = (msg: Msg, model: Model): [Model, Eff] => {
   switch (msg.name) {
@@ -124,11 +131,11 @@ export const view = (model: Model): Html.Html<Msg> => {
         [Html.classNames(['flex-column', model.loading && 'loading'])],
         [
           Html.button(
-            [Html.onClick({ name: 'GetIncrement' })],
+            [Html.onClick(GetIncrement)],
             [Html.text('Get increment')]
           ),
           Html.button(
-            [Html.onClick({ name: 'GetDecrement' })],
+            [Html.onClick(GetDecrement)],
             [Html.text('Get decrement')]
           ),
         ]
@@ -137,11 +144,11 @@ export const view = (model: Model): Html.Html<Msg> => {
         [],
         [
           Html.button(
-            [Html.onClick({ name: 'Increment' })],
+            [Html.onClick(Increment)],
             [Html.text('+' + model.increment)]
           ),
           Html.button(
-            [Html.onClick({ name: 'Decrement' })],
+            [Html.onClick(Decrement)],
             [Html.text('-' + model.decrement)]
           ),
         ]

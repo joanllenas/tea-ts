@@ -1,12 +1,15 @@
 import './style.css';
-import { Message } from './lem/message';
+import * as Message from './lem/message';
 import * as Html from './lem/html';
 
 type Model = {
   count: number;
 };
 
-type Msg = Message<'Increment', number> | Message<'Decrement'>;
+const Increment = (n: number) => Message.msg('Increment', n);
+const Decrement = Message.msg('Decrement');
+
+type Msg = ReturnType<typeof Increment> | typeof Decrement;
 
 export const init = (): Model => ({
   count: 0,
@@ -29,11 +32,8 @@ export const view = (model: Model): Html.Html<Msg> => {
     [Html.className('border-1 padding-xl')],
     [
       Html.h2([], [Html.text('Sandbox')]),
-      Html.button(
-        [Html.onClick({ name: 'Increment', payload: 2 })],
-        [Html.text('+')]
-      ),
-      Html.button([Html.onClick({ name: 'Decrement' })], [Html.text('-')]),
+      Html.button([Html.onClick(Increment(2))], [Html.text('+')]),
+      Html.button([Html.onClick(Decrement)], [Html.text('-')]),
       Html.div([], [Html.text('Count: ' + model.count)]),
     ]
   );
