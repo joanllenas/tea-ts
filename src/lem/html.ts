@@ -76,6 +76,8 @@ export function attr(name: string, value: string | number | boolean): Attr {
 }
 
 export const className = createAttrFunction<string>('class');
+export const classNames = (classes: (string | undefined | false)[]) =>
+  className(classes.filter((cls) => !!cls).join(' '));
 
 // HTML Event factory functions
 

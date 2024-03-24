@@ -8,6 +8,6 @@ Lem.sandbox(Sandbox.init, Sandbox.update, Sandbox.view).run(
   document.getElementById('app-sandbox')!
 );
 
-Lem.element(Element.init, Element.update, Element.view).run(
+Lem.element(Element.init, Element.update, Element.effects, Element.view).run(
   document.getElementById('app-element')!
 );

@@ -9,6 +9,11 @@ body {
   font-size: x-large;
 }
 
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
 .border-1 {
   border: 1px solid black;
 }
@@ -27,4 +32,9 @@ body {
 
 .padding-xl {
   padding: 32px;
+}
+
+.loading * {
+  cursor: wait;
+  color: gray;
 }

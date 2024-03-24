@@ -9,6 +9,8 @@ import {
   VNode,
 } from 'snabbdom';
 import * as Html from './html';
+import * as Effect from './effect';
+import { Message } from './message';
 
 const patch = init([
   attributesModule,
@@ -73,18 +75,35 @@ export function sandbox<Model, Msg>(
   };
 }
 
-export function element<Model, Msg>(
-  init: () => Model,
-  update: (msg: Msg, model: Model) => Model,
+export function element<
+  Model,
+  Msg extends Message<string>,
+  Eff extends Effect.Effect<string>
+>(
+  init: () => [Model, Eff],
+  update: (msg: Msg, model: Model) => [Model, Eff],
+  effects: (eff: Eff) => Effect.EffectFn<Msg>,
   view: (model: Model) => Html.Html<Msg>
 ): Program {
   return {
     run(node) {
       if (node) {
         let vnode = patch(node, h('div', 'init'));
-        const loop = (model: Model) => {
+        const runningEffects = new Map<string, () => void>();
+        const loop = ([model, effect]: [Model, Eff]) => {
           const newNode = html2vnode(view(model), model);
           vnode = patch(vnode, newNode);
+          const effectFn = effects(effect);
+          const done = (msg: Msg) => {
+            runningEffects.delete(effect.name);
+            loop(update(msg, model));
+          };
+          if (runningEffects.has(effect.name)) {
+            const disposeFn = runningEffects.get(effect.name)!;
+            disposeFn();
+            runningEffects.delete(effect.name);
+          }
+          runningEffects.set(effect.name, effectFn(done).dispose);
         };
 
         function html2vnode(html: Html.Html<Msg>, model: Model): VNode {
