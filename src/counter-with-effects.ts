@@ -26,20 +26,22 @@ export const init = (): [Model, Eff] => [
 
 // UPDATE
 
-const Increment = Message.msg('Increment');
-const Decrement = Message.msg('Decrement');
-const GetIncrement = Message.msg('GetIncrement');
-const GotIncrement = (n: number) => Message.msg('GotIncrement', n);
-const GetDecrement = Message.msg('GetDecrement');
-const GotDecrement = (n: number) => Message.msg('GotDecrement', n);
+const msg = {
+  Increment: Message.msg('Increment'),
+  Decrement: Message.msg('Decrement'),
+  GetIncrement: Message.msg('GetIncrement'),
+  GotIncrement: (n: number) => Message.msg('GotIncrement', n),
+  GetDecrement: Message.msg('GetDecrement'),
+  GotDecrement: (n: number) => Message.msg('GotDecrement', n),
+};
 
 type Msg =
-  | typeof Increment
-  | typeof Decrement
-  | typeof GetIncrement
-  | ReturnType<typeof GotIncrement>
-  | typeof GetDecrement
-  | ReturnType<typeof GotDecrement>;
+  | typeof msg.Increment
+  | typeof msg.Decrement
+  | typeof msg.GetIncrement
+  | ReturnType<typeof msg.GotIncrement>
+  | typeof msg.GetDecrement
+  | ReturnType<typeof msg.GotDecrement>;
 
 export const update = (msg: Msg, model: Model): [Model, Eff] => {
   switch (msg.name) {
@@ -50,7 +52,7 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
       return [{ ...model, count: model.count - model.decrement }, Effect.none];
     }
     case 'GetIncrement': {
-      return [{ ...model, loading: true }, { name: 'GetIncrement' }];
+      return [{ ...model, loading: true }, eff.GetIncrement];
     }
     case 'GotIncrement': {
       return [
@@ -59,7 +61,7 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
       ];
     }
     case 'GetDecrement': {
-      return [{ ...model, loading: true }, { name: 'GetDecrement' }];
+      return [{ ...model, loading: true }, eff.GetDecrement];
     }
     case 'GotDecrement': {
       return [
@@ -72,10 +74,12 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
 
 // EFFECTS
 
-type Eff =
-  | Effect.None
-  | Effect.Effect<'GetIncrement'>
-  | Effect.Effect<'GetDecrement'>;
+const eff = {
+  GetIncrement: Effect.eff('GetIncrement'),
+  GetDecrement: Effect.eff('GetDecrement'),
+};
+
+type Eff = Effect.None | typeof eff.GetIncrement | typeof eff.GetDecrement;
 
 export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
   switch (eff.name) {
@@ -131,11 +135,11 @@ export const view = (model: Model): Html.Html<Msg> => {
         [Html.classNames(['flex-column', model.loading && 'loading'])],
         [
           Html.button(
-            [Html.onClick(GetIncrement)],
+            [Html.onClick(msg.GetIncrement)],
             [Html.text('Get increment')]
           ),
           Html.button(
-            [Html.onClick(GetDecrement)],
+            [Html.onClick(msg.GetDecrement)],
             [Html.text('Get decrement')]
           ),
         ]
@@ -144,11 +148,11 @@ export const view = (model: Model): Html.Html<Msg> => {
         [],
         [
           Html.button(
-            [Html.onClick(Increment)],
+            [Html.onClick(msg.Increment)],
             [Html.text('+' + model.increment)]
           ),
           Html.button(
-            [Html.onClick(Decrement)],
+            [Html.onClick(msg.Decrement)],
             [Html.text('-' + model.decrement)]
           ),
         ]

@@ -6,10 +6,12 @@ type Model = {
   count: number;
 };
 
-const Increment = (n: number) => Message.msg('Increment', n);
-const Decrement = Message.msg('Decrement');
+const msg = {
+  Increment: (n: number) => Message.msg('Increment', n),
+  Decrement: Message.msg('Decrement'),
+};
 
-type Msg = ReturnType<typeof Increment> | typeof Decrement;
+type Msg = ReturnType<typeof msg.Increment> | typeof msg.Decrement;
 
 export const init = (): Model => ({
   count: 0,
@@ -24,7 +26,6 @@ export const update = (msg: Msg, model: Model): Model => {
       return { count: model.count - 1 };
     }
   }
-  return model;
 };
 
 export const view = (model: Model): Html.Html<Msg> => {
@@ -32,8 +33,8 @@ export const view = (model: Model): Html.Html<Msg> => {
     [Html.className('border-1 padding-xl')],
     [
       Html.h2([], [Html.text('Sandbox')]),
-      Html.button([Html.onClick(Increment(2))], [Html.text('+')]),
-      Html.button([Html.onClick(Decrement)], [Html.text('-')]),
+      Html.button([Html.onClick(msg.Increment(2))], [Html.text('+')]),
+      Html.button([Html.onClick(msg.Decrement)], [Html.text('-')]),
       Html.div([], [Html.text('Count: ' + model.count)]),
     ]
   );
