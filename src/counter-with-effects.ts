@@ -1,7 +1,7 @@
 import './style.css';
-import * as Message from './lem/message';
-import * as Effect from './lem/effect';
-import * as Html from './lem/html';
+import * as Message from './tea/message';
+import * as Effect from './tea/effect';
+import * as Html from './tea/html';
 
 // MODEL
 

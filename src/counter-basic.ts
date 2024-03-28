@@ -1,6 +1,6 @@
 import './style.css';
-import * as Message from './lem/message';
-import * as Html from './lem/html';
+import * as Message from './tea/message';
+import * as Html from './tea/html';
 
 type Model = {
   count: number;

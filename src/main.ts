@@ -1,6 +1,6 @@
 import './style.css';
 
-import * as Lem from './lem/program';
+import * as Lem from './tea/program';
 import * as Counter from './counter-basic';
 import * as CouterWithEffects from './counter-with-effects';
 
