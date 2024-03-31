@@ -35,13 +35,7 @@ const msg = {
   GotDecrement: (n: number) => Message.msg('GotDecrement', n),
 };
 
-type Msg =
-  | typeof msg.Increment
-  | typeof msg.Decrement
-  | typeof msg.GetIncrement
-  | ReturnType<typeof msg.GotIncrement>
-  | typeof msg.GetDecrement
-  | ReturnType<typeof msg.GotDecrement>;
+type Msg = Message.ToMsg<typeof msg>;
 
 export const update = (msg: Msg, model: Model): [Model, Eff] => {
   switch (msg.name) {

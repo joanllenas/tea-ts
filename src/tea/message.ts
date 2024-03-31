@@ -22,3 +22,13 @@ export function msg<Name extends string, Payload>(
     return { name, payload } as Message<Name, Payload>;
   }
 }
+
+// Msg type generation
+
+// Extracts the return type if it's a function, returnts the type otherwise
+type ExtractMsg<T> = T extends (...args: any[]) => any ? ReturnType<T> : T;
+
+// Creates a union type with all Msg variants
+export type ToMsg<Variants> = {
+  [K in keyof Variants]: ExtractMsg<Variants[K]>;
+}[keyof Variants];

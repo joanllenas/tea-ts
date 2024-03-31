@@ -11,7 +11,7 @@ const msg = {
   Decrement: Message.msg('Decrement'),
 };
 
-type Msg = ReturnType<typeof msg.Increment> | typeof msg.Decrement;
+type Msg = Message.ToMsg<typeof msg>;
 
 export const init = (): Model => ({
   count: 0,
