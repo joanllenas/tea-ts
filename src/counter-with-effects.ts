@@ -71,9 +71,10 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
 const eff = {
   GetIncrement: Effect.eff('GetIncrement'),
   GetDecrement: Effect.eff('GetDecrement'),
+  None: Effect.none,
 };
 
-type Eff = Effect.None | typeof eff.GetIncrement | typeof eff.GetDecrement;
+type Eff = Effect.ToEff<typeof eff>;
 
 export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
   switch (eff.name) {

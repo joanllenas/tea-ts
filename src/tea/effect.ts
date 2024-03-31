@@ -34,3 +34,13 @@ export type None = typeof none;
 export function noneFn<Msg>(): EffectFn<Msg> {
   return () => ({ dispose: () => {} });
 }
+
+// Eff type generation
+
+// Extracts the return type if it's a function, returnts the type otherwise
+type ExtractEff<T> = T extends (...args: any[]) => any ? ReturnType<T> : T;
+
+// Creates a union type with all Eff variants
+export type ToEff<Variants> = {
+  [K in keyof Variants]: ExtractEff<Variants[K]>;
+}[keyof Variants];
