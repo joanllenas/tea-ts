@@ -139,7 +139,7 @@ export const view = (model: Model): Html.Html<Msg> => {
           ),
         ]
       ),
-      Html.div<Msg>( // FIXME: fix type inference. Should be inferred from the funciton signature
+      Html.div<Msg>( // FIXME: fix type inference. Should be inferred to Msg from the view funciton signature
         [],
         [
           Html.button(

@@ -62,12 +62,15 @@ export const input = createTagFunction('input');
 function createAttrFunction<Value extends string | number | boolean>(
   name: string
 ) {
-  return function (value: Value): Attr {
+  return function <Msg>(value: Value): Attribute<Msg> {
     return attr(name, value);
   };
 }
 
-export function attr(name: string, value: string | number | boolean): Attr {
+export function attr<Msg>(
+  name: string,
+  value: string | number | boolean
+): Attribute<Msg> {
   return {
     type: 'Attr',
     name,
@@ -76,18 +79,18 @@ export function attr(name: string, value: string | number | boolean): Attr {
 }
 
 export const className = createAttrFunction<string>('class');
-export const classNames = (classes: (string | undefined | false)[]) =>
-  className(classes.filter((cls) => !!cls).join(' '));
+export const classNames = <Msg>(classes: (string | undefined | false)[]) =>
+  className<Msg>(classes.filter((cls) => !!cls).join(' '));
 
 // HTML Event factory functions
 
 function createEvtFunction(name: string) {
-  return function <Msg>(msg: Msg): Evt<Msg> {
+  return function <Msg>(msg: Msg): Attribute<Msg> {
     return on(name, msg);
   };
 }
 
-export function on<Msg>(name: string, msg: Msg): Evt<Msg> {
+export function on<Msg>(name: string, msg: Msg): Attribute<Msg> {
   return {
     type: 'Evt',
     name,
