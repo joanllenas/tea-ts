@@ -22,7 +22,7 @@ type Program = {
   run: (node: Element) => void;
 };
 
-export function sandbox<Model, Msg>(
+export function simple<Model, Msg>(
   init: () => Model,
   update: (msg: Msg, model: Model) => Model,
   view: (model: Model) => Html.Html<Msg>
@@ -74,7 +74,7 @@ export function sandbox<Model, Msg>(
   };
 }
 
-export function element<Model, Msg, Eff extends Effect.Effect<string>>(
+export function advanced<Model, Msg, Eff extends Effect.Effect<string>>(
   init: () => [Model, Eff],
   update: (msg: Msg, model: Model) => [Model, Eff],
   effects: (eff: Eff) => Effect.EffectFn<Msg>,

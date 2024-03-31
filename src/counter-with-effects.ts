@@ -124,7 +124,7 @@ export const view = (model: Model): Html.Html<Msg> => {
   return Html.div(
     [Html.className('border-1 padding-xl')],
     [
-      Html.h2([], [Html.text('Element')]),
+      Html.h2([], [Html.text('Advanced')]),
       Html.div<Msg>(
         [Html.classNames(['flex-column', model.loading && 'loading'])],
         [
