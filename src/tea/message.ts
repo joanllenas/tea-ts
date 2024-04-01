@@ -1,34 +1,32 @@
-type Message<
+// Message type constructor
+export type Msg<
   Name extends string,
   Payload = undefined
 > = Payload extends undefined // this check is needed to avoid 'payload may be undefined' compiler errors
   ? { name: Name }
   : { name: Name; payload: Payload };
 
-// Message constructor
+// Message value constructor
 
-export function msg<Name extends string>(name: Name): Message<Name, undefined>;
+export function msg<Name extends string>(name: Name): Msg<Name, undefined>;
 export function msg<Name extends string, Payload>(
   name: Name,
   payload: Payload
-): Message<Name, Payload>;
+): Msg<Name, Payload>;
 export function msg<Name extends string, Payload>(
   name: Name,
   payload?: Payload
-): Message<Name, Payload> | Message<Name, undefined> {
+): Msg<Name, Payload> | Msg<Name, undefined> {
   if (payload === undefined) {
-    return { name } as Message<Name, undefined>;
+    return { name } as Msg<Name, undefined>;
   } else {
-    return { name, payload } as Message<Name, Payload>;
+    return { name, payload } as Msg<Name, Payload>;
   }
 }
 
-// Msg type generation
+// Msg Record type generation
 
-// Extracts the return type if it's a function, returnts the type otherwise
-type ExtractMsg<T> = T extends (...args: any[]) => any ? ReturnType<T> : T;
-
-// Creates a union type with all Msg variants
-export type ToMsg<Variants> = {
-  [K in keyof Variants]: ExtractMsg<Variants[K]>;
-}[keyof Variants];
+export type MsgRecord<M extends Msg<string>> = Record<
+  M['name'],
+  (...args: any) => M
+>;

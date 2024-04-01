@@ -2,45 +2,44 @@ export type Disposable = { dispose: () => void };
 
 export type EffectFn<Msg> = (done: (msg: Msg) => void) => Disposable;
 
-export type Effect<
+// Effect type constructor
+
+export type Eff<
   Name extends string,
   Payload = undefined
 > = Payload extends undefined
   ? { name: Name }
   : { name: Name; payload: Payload };
 
-// Effect constructor
+// Effect value constructor
 
-export function eff<Name extends string>(name: Name): Effect<Name, undefined>;
+export function eff<Name extends string>(name: Name): Eff<Name, undefined>;
 export function eff<Name extends string, Payload>(
   name: Name,
   payload: Payload
-): Effect<Name, Payload>;
+): Eff<Name, Payload>;
 export function eff<Name extends string, Payload>(
   name: Name,
   payload?: Payload
-): Effect<Name, Payload> | Effect<Name, undefined> {
+): Eff<Name, Payload> | Eff<Name, undefined> {
   if (payload === undefined) {
-    return { name } as Effect<Name, undefined>;
+    return { name } as Eff<Name, undefined>;
   } else {
-    return { name, payload } as Effect<Name, Payload>;
+    return { name, payload } as Eff<Name, Payload>;
   }
 }
 
 // None effect
 
-export const none: Effect<'none'> = { name: 'none' };
+export const none: Eff<'None'> = { name: 'None' };
 export type None = typeof none;
 export function noneFn<Msg>(): EffectFn<Msg> {
   return () => ({ dispose: () => {} });
 }
 
-// Eff type generation
+// Eff Record type generation
 
-// Extracts the return type if it's a function, returnts the type otherwise
-type ExtractEff<T> = T extends (...args: any[]) => any ? ReturnType<T> : T;
-
-// Creates a union type with all Eff variants
-export type ToEff<Variants> = {
-  [K in keyof Variants]: ExtractEff<Variants[K]>;
-}[keyof Variants];
+export type EffRecord<E extends Eff<string>> = Record<
+  E['name'],
+  (...args: any) => E
+>;

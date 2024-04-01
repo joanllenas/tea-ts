@@ -26,16 +26,22 @@ export const init = (): [Model, Eff] => [
 
 // UPDATE
 
-const msg = {
-  Increment: Message.msg('Increment'),
-  Decrement: Message.msg('Decrement'),
-  GetIncrement: Message.msg('GetIncrement'),
+type Msg =
+  | Message.Msg<'Increment'>
+  | Message.Msg<'Decrement'>
+  | Message.Msg<'GetIncrement'>
+  | Message.Msg<'GotIncrement', number>
+  | Message.Msg<'GetDecrement'>
+  | Message.Msg<'GotDecrement', number>;
+
+const msg: Message.MsgRecord<Msg> = {
+  Increment: () => Message.msg('Increment'),
+  Decrement: () => Message.msg('Decrement'),
+  GetIncrement: () => Message.msg('GetIncrement'),
   GotIncrement: (n: number) => Message.msg('GotIncrement', n),
-  GetDecrement: Message.msg('GetDecrement'),
+  GetDecrement: () => Message.msg('GetDecrement'),
   GotDecrement: (n: number) => Message.msg('GotDecrement', n),
 };
-
-type Msg = Message.ToMsg<typeof msg>;
 
 export const update = (msg: Msg, model: Model): [Model, Eff] => {
   switch (msg.name) {
@@ -46,7 +52,7 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
       return [{ ...model, count: model.count - model.decrement }, Effect.none];
     }
     case 'GetIncrement': {
-      return [{ ...model, loading: true }, eff.GetIncrement];
+      return [{ ...model, loading: true }, eff.GetIncrement()];
     }
     case 'GotIncrement': {
       return [
@@ -55,7 +61,7 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
       ];
     }
     case 'GetDecrement': {
-      return [{ ...model, loading: true }, eff.GetDecrement];
+      return [{ ...model, loading: true }, eff.GetDecrement()];
     }
     case 'GotDecrement': {
       return [
@@ -68,13 +74,18 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
 
 // EFFECTS
 
-const eff = {
-  GetIncrement: Effect.eff('GetIncrement'),
-  GetDecrement: Effect.eff('GetDecrement'),
-  None: Effect.none,
+type Eff =
+  | Effect.None
+  | Effect.Eff<'GetIncrement'>
+  | Message.Msg<'GetDecrement'>;
+
+const eff: Effect.EffRecord<Eff> = {
+  GetIncrement: () => Effect.eff('GetIncrement'),
+  GetDecrement: () => Effect.eff('GetDecrement'),
+  None: () => Effect.none,
 };
 
-type Eff = Effect.ToEff<typeof eff>;
+// type Eff = Effect.ToEff<typeof eff>;
 
 export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
   switch (eff.name) {
@@ -84,7 +95,7 @@ export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
           () =>
             done({
               name: 'GotIncrement',
-              payload: Math.round(Math.random() * 10),
+              payload: Math.round(Math.random() * 100),
             }),
           1000
         );
@@ -101,7 +112,7 @@ export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
           () =>
             done({
               name: 'GotDecrement',
-              payload: Math.round(Math.random() * 10),
+              payload: Math.round(Math.random() * 100),
             }),
           1000
         );
@@ -113,7 +124,7 @@ export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
       };
     }
 
-    case 'none': {
+    case 'None': {
       return Effect.noneFn<Msg>();
     }
   }
@@ -126,28 +137,28 @@ export const view = (model: Model): Html.Html<Msg> => {
     [Html.className('border-1 padding-xl')],
     [
       Html.h2([], [Html.text('Advanced')]),
-      Html.div<Msg>(
+      Html.div(
         [Html.classNames(['flex-column', model.loading && 'loading'])],
         [
           Html.button(
-            [Html.onClick(msg.GetIncrement)],
+            [Html.onClick(msg.GetIncrement())],
             [Html.text('Get increment')]
           ),
           Html.button(
-            [Html.onClick(msg.GetDecrement)],
+            [Html.onClick(msg.GetDecrement())],
             [Html.text('Get decrement')]
           ),
         ]
       ),
-      Html.div<Msg>( // FIXME: fix type inference. Should be inferred to Msg from the view funciton signature
+      Html.div(
         [],
         [
           Html.button(
-            [Html.onClick(msg.Increment)],
+            [Html.onClick(msg.Increment())],
             [Html.text('+' + model.increment)]
           ),
           Html.button(
-            [Html.onClick(msg.Decrement)],
+            [Html.onClick(msg.Decrement())],
             [Html.text('-' + model.decrement)]
           ),
         ]

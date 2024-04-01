@@ -74,7 +74,7 @@ export function simple<Model, Msg>(
   };
 }
 
-export function advanced<Model, Msg, Eff extends Effect.Effect<string>>(
+export function advanced<Model, Msg, Eff extends Effect.Eff<string>>(
   init: () => [Model, Eff],
   update: (msg: Msg, model: Model) => [Model, Eff],
   effects: (eff: Eff) => Effect.EffectFn<Msg>,
