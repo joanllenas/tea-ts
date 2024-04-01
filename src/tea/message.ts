@@ -3,8 +3,8 @@ export type Msg<
   Name extends string,
   Payload = undefined
 > = Payload extends undefined // this check is needed to avoid 'payload may be undefined' compiler errors
-  ? { name: Name }
-  : { name: Name; payload: Payload };
+  ? { type: 'Msg'; name: Name }
+  : { type: 'Msg'; name: Name; payload: Payload };
 
 // Message value constructor
 

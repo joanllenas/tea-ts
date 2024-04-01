@@ -77,26 +77,25 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
 type Eff =
   | Effect.None
   | Effect.Eff<'GetIncrement'>
-  | Message.Msg<'GetDecrement'>;
+  | Effect.Eff<'GetDecrement'>;
 
 const eff: Effect.EffRecord<Eff> = {
+  None: () => Effect.none,
   GetIncrement: () => Effect.eff('GetIncrement'),
   GetDecrement: () => Effect.eff('GetDecrement'),
-  None: () => Effect.none,
 };
 
 // type Eff = Effect.ToEff<typeof eff>;
 
-export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
-  switch (eff.name) {
+export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
+  switch (effect.name) {
+    case 'None': {
+      return Effect.noneFn<Msg>();
+    }
     case 'GetIncrement': {
       return function (done) {
         const ref = setTimeout(
-          () =>
-            done({
-              name: 'GotIncrement',
-              payload: Math.round(Math.random() * 100),
-            }),
+          () => done(msg.GotIncrement(Math.round(Math.random() * 100))),
           1000
         );
         return {
@@ -109,11 +108,7 @@ export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
     case 'GetDecrement': {
       return function (done) {
         const ref = setTimeout(
-          () =>
-            done({
-              name: 'GotDecrement',
-              payload: Math.round(Math.random() * 100),
-            }),
+          () => done(msg.GotDecrement(Math.round(Math.random() * 100))),
           1000
         );
         return {
@@ -122,10 +117,6 @@ export const effects = (eff: Eff): Effect.EffectFn<Msg> => {
           },
         };
       };
-    }
-
-    case 'None': {
-      return Effect.noneFn<Msg>();
     }
   }
 };

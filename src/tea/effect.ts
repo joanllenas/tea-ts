@@ -8,8 +8,8 @@ export type Eff<
   Name extends string,
   Payload = undefined
 > = Payload extends undefined
-  ? { name: Name }
-  : { name: Name; payload: Payload };
+  ? { type: 'Effect'; name: Name }
+  : { type: 'Effect'; name: Name; payload: Payload };
 
 // Effect value constructor
 
@@ -31,7 +31,7 @@ export function eff<Name extends string, Payload>(
 
 // None effect
 
-export const none: Eff<'None'> = { name: 'None' };
+export const none: Eff<'None'> = { type: 'Effect', name: 'None' };
 export type None = typeof none;
 export function noneFn<Msg>(): EffectFn<Msg> {
   return () => ({ dispose: () => {} });
