@@ -1,4 +1,5 @@
 // Message type constructor
+
 export type Msg<
   Name extends string,
   Payload = undefined

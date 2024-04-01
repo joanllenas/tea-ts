@@ -85,8 +85,6 @@ const eff: Effect.EffRecord<Eff> = {
   GetDecrement: () => Effect.eff('GetDecrement'),
 };
 
-// type Eff = Effect.ToEff<typeof eff>;
-
 export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
   switch (effect.name) {
     case 'None': {
