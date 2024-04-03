@@ -6,7 +6,7 @@ export type EffectFn<Msg> = (done: (msg: Msg) => void) => Disposable;
 
 export type Eff<
   Name extends string,
-  Payload = undefined
+  Payload = undefined,
 > = Payload extends undefined
   ? { type: 'Effect'; name: Name }
   : { type: 'Effect'; name: Name; payload: Payload };
@@ -16,11 +16,11 @@ export type Eff<
 export function eff<Name extends string>(name: Name): Eff<Name, undefined>;
 export function eff<Name extends string, Payload>(
   name: Name,
-  payload: Payload
+  payload: Payload,
 ): Eff<Name, Payload>;
 export function eff<Name extends string, Payload>(
   name: Name,
-  payload?: Payload
+  payload?: Payload,
 ): Eff<Name, Payload> | Eff<Name, undefined> {
   if (payload === undefined) {
     return { name } as Eff<Name, undefined>;

@@ -14,9 +14,9 @@ type Model = {
 
 // INIT
 
-export const init = (): [Model, Eff] => [
+export const init = (flags: { initialCount: number }): [Model, Eff] => [
   {
-    count: 0,
+    count: flags.initialCount,
     increment: 1,
     decrement: 1,
     loading: false,
@@ -94,7 +94,7 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
       return function (done) {
         const ref = setTimeout(
           () => done(msg.GotIncrement(Math.round(Math.random() * 100))),
-          1000
+          1000,
         );
         return {
           dispose: () => {
@@ -107,7 +107,7 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
       return function (done) {
         const ref = setTimeout(
           () => done(msg.GotDecrement(Math.round(Math.random() * 100))),
-          1000
+          1000,
         );
         return {
           dispose: () => {
@@ -123,36 +123,36 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
 
 export const view = (model: Model): Html.Html<Msg> => {
   return Html.div(
-    [Html.className('border-1 padding-xl')],
+    [Html.className('border-1 padding-lg')],
     [
-      Html.h2([], [Html.text('Advanced')]),
+      Html.h3([], [Html.text('Advanced')]),
       Html.div(
         [Html.classNames(['flex-column', model.loading && 'loading'])],
         [
           Html.button(
             [Html.onClick(msg.GetIncrement())],
-            [Html.text('Get increment')]
+            [Html.text('Get increment')],
           ),
           Html.button(
             [Html.onClick(msg.GetDecrement())],
-            [Html.text('Get decrement')]
+            [Html.text('Get decrement')],
           ),
-        ]
+        ],
       ),
       Html.div(
         [],
         [
           Html.button(
             [Html.onClick(msg.Increment())],
-            [Html.text('+' + model.increment)]
+            [Html.text('+' + model.increment)],
           ),
           Html.button(
             [Html.onClick(msg.Decrement())],
-            [Html.text('-' + model.decrement)]
+            [Html.text('-' + model.decrement)],
           ),
-        ]
+        ],
       ),
       Html.div([], [Html.text('Count: ' + model.count)]),
-    ]
+    ],
   );
 };

@@ -21,7 +21,7 @@ export type Html<Msg> =
 function createTagFunction(tag: string) {
   return function <Msg>(
     attributes: Attribute<Msg>[],
-    children: Html<Msg>[]
+    children: Html<Msg>[],
   ): Html<Msg> {
     return node(tag, attributes, children);
   };
@@ -37,7 +37,7 @@ export function text<Msg>(text: string): Html<Msg> {
 export function node<Msg>(
   tag: string,
   attributes: Attribute<Msg>[],
-  children: Html<Msg>[]
+  children: Html<Msg>[],
 ): Html<Msg> {
   return {
     type: 'Html',
@@ -56,11 +56,12 @@ export const h5 = createTagFunction('h5');
 export const h6 = createTagFunction('h6');
 export const button = createTagFunction('button');
 export const input = createTagFunction('input');
+export const label = createTagFunction('label');
 
 // HTML Attribute factory functions
 
 function createAttrFunction<Value extends string | number | boolean>(
-  name: string
+  name: string,
 ) {
   return function <Msg>(value: Value): Attribute<Msg> {
     return attr(name, value);
@@ -69,7 +70,7 @@ function createAttrFunction<Value extends string | number | boolean>(
 
 export function attr<Msg>(
   name: string,
-  value: string | number | boolean
+  value: string | number | boolean,
 ): Attribute<Msg> {
   return {
     type: 'Attr',
@@ -99,6 +100,7 @@ export function on<Msg>(name: string, msg: Msg): Attribute<Msg> {
 }
 
 export const onClick = createEvtFunction('click');
+export const onInput = createEvtFunction('input');
 
 // Utils
 

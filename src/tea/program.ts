@@ -18,17 +18,13 @@ const patch = init([
   styleModule,
 ]);
 
-type Program = {
-  run: (node: Element) => void;
-};
-
 export function simple<Model, Msg>(
   init: () => Model,
   update: (msg: Msg, model: Model) => Model,
-  view: (model: Model) => Html.Html<Msg>
-): Program {
+  view: (model: Model) => Html.Html<Msg>,
+) {
   return {
-    run(node) {
+    run(node: Element): void {
       if (node) {
         let vnode = patch(node, h('div', 'init'));
         const loop = (model: Model) => {
@@ -74,14 +70,14 @@ export function simple<Model, Msg>(
   };
 }
 
-export function advanced<Model, Msg, Eff extends Effect.Eff<string>>(
-  init: () => [Model, Eff],
+export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
+  init: (flags: Flags) => [Model, Eff],
   update: (msg: Msg, model: Model) => [Model, Eff],
   effects: (eff: Eff) => Effect.EffectFn<Msg>,
-  view: (model: Model) => Html.Html<Msg>
-): Program {
+  view: (model: Model) => Html.Html<Msg>,
+) {
   return {
-    run(node) {
+    run(node: Element, flags: Flags): void {
       if (node) {
         let vnode = patch(node, h('div', 'init'));
         const runningEffects = new Map<string, () => void>();
@@ -131,7 +127,7 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>>(
           return h(html.tag, nodeData, children);
         }
 
-        loop(init());
+        loop(init(flags));
       } else {
         throw new Error('Could not mount app, node is not an Html Element');
       }

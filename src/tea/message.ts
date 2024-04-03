@@ -2,7 +2,7 @@
 
 export type Msg<
   Name extends string,
-  Payload = undefined
+  Payload = undefined,
 > = Payload extends undefined // this check is needed to avoid 'payload may be undefined' compiler errors
   ? { type: 'Msg'; name: Name }
   : { type: 'Msg'; name: Name; payload: Payload };
@@ -12,11 +12,11 @@ export type Msg<
 export function msg<Name extends string>(name: Name): Msg<Name, undefined>;
 export function msg<Name extends string, Payload>(
   name: Name,
-  payload: Payload
+  payload: Payload,
 ): Msg<Name, Payload>;
 export function msg<Name extends string, Payload>(
   name: Name,
-  payload?: Payload
+  payload?: Payload,
 ): Msg<Name, Payload> | Msg<Name, undefined> {
   if (payload === undefined) {
     return { name } as Msg<Name, undefined>;
