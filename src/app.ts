@@ -1,28 +1,33 @@
 import './style.css';
 import * as Message from './tea/message';
 import * as Effect from './tea/effect';
-import * as Subscription from './tea/subscription';
 import * as Html from './tea/html';
+import * as UserReposPage from './app/repos-page';
+import * as UserRepoPage from './app/repo-page';
 
 // MODEL
 
+type Page<PageModel, Path extends string> = {
+  type: 'App.Page';
+  path: Path;
+  model: PageModel;
+};
+
+type Pages =
+  | Page<UserReposPage.Model, '/user-repos'>
+  | Page<UserRepoPage.Model, '/user/{owner}/repo/{repo}'>;
+
 type Model = {
-  count: number;
-  increment: number;
-  decrement: number;
-  loading: boolean;
-  autoincrement: boolean;
+  url: string;
+  //page: Pages;
 };
 
 // INIT
 
-export const init = (flags: { initialCount: number }): [Model, Eff] => [
+export const init = (): [Model, Eff] => [
   {
-    count: flags.initialCount,
-    increment: 1,
-    decrement: 1,
-    loading: false,
-    autoincrement: false,
+    url: '?????',
+    //page: parseUrlAndFindPage(...)
   },
   Effect.none,
 ];
@@ -35,8 +40,7 @@ type Msg =
   | Message.Msg<'GetIncrement'>
   | Message.Msg<'GotIncrement', number>
   | Message.Msg<'GetDecrement'>
-  | Message.Msg<'GotDecrement', number>
-  | Message.Msg<'ToggleAutoincrement'>;
+  | Message.Msg<'GotDecrement', number>;
 
 const msg: Message.MsgRecord<Msg> = {
   Increment: () => Message.msg('Increment'),
@@ -45,7 +49,6 @@ const msg: Message.MsgRecord<Msg> = {
   GotIncrement: (n: number) => Message.msg('GotIncrement', n),
   GetDecrement: () => Message.msg('GetDecrement'),
   GotDecrement: (n: number) => Message.msg('GotDecrement', n),
-  ToggleAutoincrement: () => Message.msg('ToggleAutoincrement'),
 };
 
 export const update = (msg: Msg, model: Model): [Model, Eff] => {
@@ -73,9 +76,6 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
         { ...model, loading: false, decrement: msg.payload },
         Effect.none,
       ];
-    }
-    case 'ToggleAutoincrement': {
-      return [{ ...model, autoincrement: !model.autoincrement }, Effect.none];
     }
   }
 };
@@ -127,52 +127,13 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
   }
 };
 
-// SUBSCRIPTIONS
-
-export const subscriptions = (model: Model): Subscription.Sub<Msg> => {
-  if (model.autoincrement) {
-    return {
-      timer: function (update) {
-        const ref = setInterval(() => {
-          update(msg.Increment());
-        }, 1000);
-        return {
-          dispose: () => {
-            clearTimeout(ref);
-          },
-        };
-      },
-    };
-  }
-  return {};
-};
-
 // VIEW
 
 export const view = (model: Model): Html.Html<Msg> => {
   return Html.div(
-    [Html.className('border-1 padding-lg')],
+    [Html.className('border-1 padding-xl')],
     [
-      Html.h3([], [Html.text('Advanced')]),
-      Html.div(
-        [],
-        [
-          Html.label(
-            [],
-            [
-              Html.text('Auto increment'),
-              Html.input(
-                [
-                  Html.attr('type', 'checkbox'),
-                  Html.attr('checked', model.autoincrement),
-                  Html.onChange(msg.ToggleAutoincrement()),
-                ],
-                [],
-              ),
-            ],
-          ),
-        ],
-      ),
+      Html.h2([], [Html.text('Advanced')]),
       Html.div(
         [Html.classNames(['flex-column', model.loading && 'loading'])],
         [

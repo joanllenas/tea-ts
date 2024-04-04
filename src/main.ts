@@ -13,6 +13,7 @@ Tea.advanced(
   CouterWithEffects.init,
   CouterWithEffects.update,
   CouterWithEffects.effects,
+  CouterWithEffects.subscriptions,
   CouterWithEffects.view,
 ).run(document.getElementById('app-advanced')!, { initialCount: 4 });
 

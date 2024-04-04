@@ -79,6 +79,10 @@ export function attr<Msg>(
   };
 }
 
+export function noAttr<Msg>(): Attribute<Msg> {
+  return { type: 'Attr', name: '', value: '' };
+}
+
 export const className = createAttrFunction<string>('class');
 export const classNames = <Msg>(classes: (string | undefined | false)[]) =>
   className<Msg>(classes.filter((cls) => !!cls).join(' '));
@@ -99,7 +103,12 @@ export function on<Msg>(name: string, msg: Msg): Attribute<Msg> {
   };
 }
 
+export function noEvt<Msg>(): Attribute<Msg> {
+  return { type: 'Evt', name: '', msg: null as Msg };
+}
+
 export const onClick = createEvtFunction('click');
+export const onChange = createEvtFunction('change');
 export const onInput = createEvtFunction('input');
 
 // Utils

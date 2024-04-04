@@ -10,6 +10,7 @@ import {
 } from 'snabbdom';
 import * as Html from './html';
 import * as Effect from './effect';
+import * as Subscription from './subscription';
 
 const patch = init([
   attributesModule,
@@ -74,16 +75,23 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
   init: (flags: Flags) => [Model, Eff],
   update: (msg: Msg, model: Model) => [Model, Eff],
   effects: (eff: Eff) => Effect.EffectFn<Msg>,
+  subscriptions: (model: Model) => Subscription.Sub<Msg>,
   view: (model: Model) => Html.Html<Msg>,
 ) {
   return {
     run(node: Element, flags: Flags): void {
       if (node) {
         let vnode = patch(node, h('div', 'init'));
+        const runningSubs = new Map<string, () => void>();
         const runningEffects = new Map<string, () => void>();
+
         const loop = ([model, effect]: [Model, Eff]) => {
+          // VDom
           const newNode = html2vnode(view(model), model);
           vnode = patch(vnode, newNode);
+
+          // Effects
+          // TODO: handle batched effects
           const effectFn = effects(effect);
           const done = (msg: Msg) => {
             runningEffects.delete(effect.name);
@@ -95,6 +103,29 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
             runningEffects.delete(effect.name);
           }
           runningEffects.set(effect.name, effectFn(done).dispose);
+
+          // Subs
+          const newSubs = subscriptions(model);
+          // TODO: this is naive, same key could have a new sub
+          // TODO: handle batched subs
+          // Kill and remove (from old) the ones in old but not in new
+          for (let [key, dispose] of runningSubs) {
+            if (newSubs[key] === undefined) {
+              dispose();
+              // It's safe to delete items from a Map while iterating over it
+              runningSubs.delete(key);
+            }
+          }
+          // Initialize and add (to old) the ones in new but not in old
+          for (let key in newSubs) {
+            if (!runningSubs.has(key)) {
+              const toUpdate = (msg: Msg) => {
+                loop(update(msg, model));
+              };
+              const initSubFn = newSubs[key];
+              runningSubs.set(key, initSubFn(toUpdate).dispose);
+            }
+          }
         };
 
         function html2vnode(html: Html.Html<Msg>, model: Model): VNode {
@@ -110,6 +141,9 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
 
           // Attrs
           html.attributes.forEach((cur) => {
+            if (cur.name === '') {
+              return null;
+            }
             if (Html.isEvent(cur)) {
               nodeData.on![cur.name] = () => {
                 loop(update(cur.msg, model));

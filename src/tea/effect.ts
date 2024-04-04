@@ -37,6 +37,11 @@ export function noneFn<Msg>(): EffectFn<Msg> {
   return () => ({ dispose: () => {} });
 }
 
+// Batch effect
+
+export const batch = <Name extends string, Payload>(list: Eff<Name, Payload>) =>
+  eff('Batch', list);
+
 // Eff Record type generation
 
 export type EffRecord<E extends Eff<string>> = Record<
