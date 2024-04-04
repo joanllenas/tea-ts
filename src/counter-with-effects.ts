@@ -132,9 +132,9 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
 export const subscriptions = (model: Model): Subscription.Sub<Msg> => {
   if (model.autoincrement) {
     return {
-      timer: function (update) {
+      timer: function (send) {
         const ref = setInterval(() => {
-          update(msg.Increment());
+          send(msg.Increment());
         }, 1000);
         return {
           dispose: () => {

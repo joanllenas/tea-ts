@@ -119,11 +119,11 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
           // Initialize and add (to old) the ones in new but not in old
           for (let key in newSubs) {
             if (!runningSubs.has(key)) {
-              const toUpdate = (msg: Msg) => {
+              const send = (msg: Msg) => {
                 loop(update(msg, model));
               };
               const initSubFn = newSubs[key];
-              runningSubs.set(key, initSubFn(toUpdate).dispose);
+              runningSubs.set(key, initSubFn(send).dispose);
             }
           }
         };
