@@ -19,6 +19,53 @@ const patch = init([
   styleModule,
 ]);
 
+type Scheduler<Msg> = {
+  queue: (msg: Msg) => void;
+};
+
+function html2vnode<Model, Msg>(
+  html: Html.Html<Msg>,
+  model: Model,
+  scheduler: Scheduler<Msg>,
+): VNode {
+  if (html.type === 'Text') {
+    return h('span', html.text);
+  }
+
+  let nodeData: VNodeData = {
+    on: {},
+    attrs: {},
+    children: [],
+  };
+
+  // Attrs
+  html.attributes.forEach((cur) => {
+    if (cur.name === '') {
+      return null;
+    }
+    if (Html.isEvent(cur)) {
+      nodeData.on![cur.name] = () => {
+        scheduler.queue(cur.msg);
+      };
+    } else if (Html.isAttr(cur)) {
+      nodeData.attrs![cur.name] = cur.value;
+    }
+  });
+
+  // Children
+  const children = html.children.map((cur) => {
+    return html2vnode(cur, model, scheduler);
+  });
+
+  return h(html.tag, nodeData, children);
+}
+
+// ----------------------------
+//
+// SIMPLE PROGRAM
+//
+// ----------------------------
+
 export function simple<Model, Msg>(
   init: () => Model,
   update: (msg: Msg, model: Model) => Model,
@@ -28,42 +75,30 @@ export function simple<Model, Msg>(
     run(node: Element): void {
       if (node) {
         let vnode = patch(node, h('div', 'init'));
-        const loop = (model: Model) => {
-          const newNode = html2vnode(view(model), model);
-          vnode = patch(vnode, newNode);
-        };
+        let model = init();
+        const scheduler: Scheduler<Msg> = initScheduler();
+        let raf = render();
 
-        function html2vnode(html: Html.Html<Msg>, model: Model): VNode {
-          if (html.type === 'Text') {
-            return h('span', html.text);
-          }
-
-          let nodeData: VNodeData = {
-            on: {},
-            attrs: {},
-            children: [],
-          };
-
-          // Attrs
-          html.attributes.forEach((cur) => {
-            if (Html.isEvent(cur)) {
-              nodeData.on![cur.name] = () => {
-                loop(update(cur.msg, model));
-              };
-            } else if (Html.isAttr(cur)) {
-              nodeData.attrs![cur.name] = cur.value;
-            }
+        function render() {
+          return window.requestAnimationFrame(() => {
+            const newNode = html2vnode(view(model), model, scheduler);
+            vnode = patch(vnode, newNode);
           });
-
-          // Children
-          const children = html.children.map((cur) => {
-            return html2vnode(cur, model);
-          });
-
-          return h(html.tag, nodeData, children);
         }
 
-        loop(init());
+        function initScheduler() {
+          return {
+            queue: (msg: Msg) => {
+              window.cancelAnimationFrame(raf);
+              model = update(msg, model);
+
+              // ----------------------------
+              // Render VDom
+              // ----------------------------
+              raf = render();
+            },
+          };
+        }
       } else {
         throw new Error('Could not mount app, node is not an Html Element');
       }
@@ -73,13 +108,9 @@ export function simple<Model, Msg>(
 
 // ----------------------------
 //
-// ADVANCED
+// ADVANCED PROGRAM
 //
 // ----------------------------
-
-type Scheduler<Msg> = {
-  queue: (msg: Msg) => void;
-};
 
 export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
   init: (flags: Flags) => [Model, Eff],
@@ -164,41 +195,4 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
       }
     },
   };
-}
-
-function html2vnode<Model, Msg>(
-  html: Html.Html<Msg>,
-  model: Model,
-  scheduler: Scheduler<Msg>,
-): VNode {
-  if (html.type === 'Text') {
-    return h('span', html.text);
-  }
-
-  let nodeData: VNodeData = {
-    on: {},
-    attrs: {},
-    children: [],
-  };
-
-  // Attrs
-  html.attributes.forEach((cur) => {
-    if (cur.name === '') {
-      return null;
-    }
-    if (Html.isEvent(cur)) {
-      nodeData.on![cur.name] = () => {
-        scheduler.queue(cur.msg);
-      };
-    } else if (Html.isAttr(cur)) {
-      nodeData.attrs![cur.name] = cur.value;
-    }
-  });
-
-  // Children
-  const children = html.children.map((cur) => {
-    return html2vnode(cur, model, scheduler);
-  });
-
-  return h(html.tag, nodeData, children);
 }
