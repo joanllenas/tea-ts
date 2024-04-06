@@ -12,16 +12,20 @@ import * as Html from './html';
 import * as Effect from './effect';
 import * as Subscription from './subscription';
 
+type Scheduler<Msg> = {
+  queue: (msg: Msg) => void;
+};
+
+// ----------------------------
+// VDOM
+// ----------------------------
+
 const patch = init([
   attributesModule,
   datasetModule,
   eventListenersModule,
   styleModule,
 ]);
-
-type Scheduler<Msg> = {
-  queue: (msg: Msg) => void;
-};
 
 function html2vnode<Model, Msg>(
   html: Html.Html<Msg>,
@@ -74,7 +78,7 @@ export function simple<Model, Msg>(
   return {
     run(node: Element): void {
       if (node) {
-        let vnode = patch(node, h('div', 'init'));
+        let vnode = patch(node, h('initial'));
         let model = init();
         const scheduler: Scheduler<Msg> = initScheduler();
         let raf = render();
@@ -122,7 +126,7 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
   return {
     run(node: Element, flags: Flags): void {
       if (node) {
-        let vnode = patch(node, h('div', 'init'));
+        let vnode = patch(node, h('div', 'initial'));
         const runningSubs = new Map<string, () => void>();
         const runningEffects = new Map<string, () => void>();
         let [model, effect] = init(flags);
