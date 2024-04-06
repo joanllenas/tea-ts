@@ -42,9 +42,13 @@ export function noneFn<Msg>(): EffectFn<Msg> {
 export const batch = <Name extends string, Payload>(list: Eff<Name, Payload>) =>
   eff('Batch', list);
 
-// Eff Record type generation
+// Helper type to extract payload type for a given effect
+type ExtractPayloadType<Name extends string, E extends Eff<string>> =
+  E extends Eff<Name, infer Payload> ? Payload : never;
 
-export type EffRecord<E extends Eff<string>> = Record<
-  E['name'],
-  (...args: any) => E
->;
+// Eff Record type generation using conditional types to infer payload
+export type EffRecord<E extends Eff<string, any>> = {
+  [K in E['name']]: ExtractPayloadType<K, E> extends never
+    ? () => E
+    : (payload: ExtractPayloadType<K, E>) => E;
+};

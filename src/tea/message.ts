@@ -25,9 +25,13 @@ export function msg<Name extends string, Payload>(
   }
 }
 
-// Msg Record type generation
+// Helper type to extract payload type for a given message
+type ExtractPayloadType<Name extends string, M extends Msg<string>> =
+  M extends Msg<Name, infer Payload> ? Payload : never;
 
-export type MsgRecord<M extends Msg<string>> = Record<
-  M['name'],
-  (...args: any) => M
->;
+// Msg Record type generation using conditional types to infer payload
+export type MsgRecord<M extends Msg<string, any>> = {
+  [K in M['name']]: ExtractPayloadType<K, M> extends never
+    ? () => M
+    : (payload: ExtractPayloadType<K, M>) => M;
+};
