@@ -1,96 +1,86 @@
 import './style.css';
 import * as Message from './tea/message';
 import * as Effect from './tea/effect';
+import * as Subscription from './tea/subscription';
 import * as Html from './tea/html';
-import * as UserReposPage from './app/repos-page';
-import * as UserRepoPage from './app/repo-page';
+import * as Nav from './tea/navigation';
+import * as NotFoundPage from './app/page/not-found';
+import * as ReposPage from './app/page/repos-page';
+import * as RepoPage from './app/page/repo-page';
 
 // MODEL
 
-type Page<PageModel, Path extends string> = {
-  type: 'App.Page';
-  path: Path;
-  model: PageModel;
-};
-
-type Pages =
-  | Page<UserReposPage.Model, '/user-repos'>
-  | Page<UserRepoPage.Model, '/user/{owner}/repo/{repo}'>;
-
 type Model = {
   url: string;
-  //page: Pages;
+  home: { title: string };
+  cats: { title: string };
+  repos: ReposPage.Model;
+  repo: RepoPage.Model;
 };
 
 // INIT
 
-export const init = (): [Model, Eff] => [
-  {
-    url: '?????',
-    //page: parseUrlAndFindPage(...)
-  },
-  Effect.none,
-];
+export const init = (flags: { url: string }): [Model, Eff] => {
+  const [reposModel, reposEffects] = ReposPage.init();
+  const [repoModel, repoEffects] = RepoPage.init();
+  return [
+    {
+      url: flags.url,
+      home: { title: 'Home' },
+      cats: { title: 'Cats' },
+      repos: reposModel,
+      repo: repoModel,
+    },
+    Effect.none,
+    //Effect.batch([reposEffects, repoEffects]),
+  ];
+};
 
 // UPDATE
 
 type Msg =
-  | Message.Msg<'Increment'>
-  | Message.Msg<'Decrement'>
-  | Message.Msg<'GetIncrement'>
-  | Message.Msg<'GotIncrement', number>
-  | Message.Msg<'GetDecrement'>
-  | Message.Msg<'GotDecrement', number>;
+  | Message.Msg<'LinkClicked', Nav.UrlRequest>
+  | Message.Msg<'UrlChanged', string>
+  | ReposPage.Msg;
 
 const msg: Message.MsgRecord<Msg> = {
-  Increment: () => Message.msg('Increment'),
-  Decrement: () => Message.msg('Decrement'),
-  GetIncrement: () => Message.msg('GetIncrement'),
-  GotIncrement: (n: number) => Message.msg('GotIncrement', n),
-  GetDecrement: () => Message.msg('GetDecrement'),
-  GotDecrement: (n: number) => Message.msg('GotDecrement', n),
+  LinkClicked: (urlRequest) => Message.msg('LinkClicked', urlRequest),
+  UrlChanged: (url) => Message.msg('UrlChanged', url),
+  ...ReposPage.msg,
 };
 
 export const update = (msg: Msg, model: Model): [Model, Eff] => {
   switch (msg.name) {
-    case 'Increment': {
-      return [{ ...model, count: model.count + model.increment }, Effect.none];
+    case 'LinkClicked': {
+      if (Nav.isInternal(msg.payload)) {
+        return [
+          { ...model, url: msg.payload.url },
+          eff.NavPushUrl(msg.payload.url),
+        ];
+      }
+      return [model, eff.NavLoad(msg.payload.url)];
     }
-    case 'Decrement': {
-      return [{ ...model, count: model.count - model.decrement }, Effect.none];
+    case 'UrlChanged': {
+      let eff = Effect.none;
+      return [{ ...model, url: msg.payload }, eff];
     }
-    case 'GetIncrement': {
-      return [{ ...model, loading: true }, eff.GetIncrement()];
-    }
-    case 'GotIncrement': {
-      return [
-        { ...model, loading: false, increment: msg.payload },
-        Effect.none,
-      ];
-    }
-    case 'GetDecrement': {
-      return [{ ...model, loading: true }, eff.GetDecrement()];
-    }
-    case 'GotDecrement': {
-      return [
-        { ...model, loading: false, decrement: msg.payload },
-        Effect.none,
-      ];
+    case 'UserRequestedRepos':
+    case 'BackendReturnedRepos':
+    case 'UserChangedUsername': {
+      const [reposModel, reposEffects] = ReposPage.update(msg, model.repos);
+      return [{ ...model, repos: reposModel }, reposEffects];
     }
   }
 };
 
 // EFFECTS
 
-type Eff =
-  | Effect.None
-  | Effect.Eff<'GetIncrement'>
-  | Effect.Eff<'GetDecrement'>;
+type Eff = Effect.None | Nav.Effects | ReposPage.Eff;
 
 const eff: Effect.EffRecord<Eff> = {
-  None: () => Effect.none,
-  GetIncrement: () => Effect.eff('GetIncrement'),
-  GetDecrement: () => Effect.eff('GetDecrement'),
+  //None: () => Effect.none,
+  ...Nav.effects(),
+  ...ReposPage.eff,
 };
 
 export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
@@ -98,69 +88,101 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
     case 'None': {
       return Effect.noneFn<Msg>();
     }
-    case 'GetIncrement': {
-      return function (done) {
-        const ref = setTimeout(
-          () => done(msg.GotIncrement(Math.round(Math.random() * 100))),
-          1000,
-        );
-        return {
-          dispose: () => {
-            clearTimeout(ref);
-          },
-        };
-      };
+    case 'NavPushUrl': {
+      return Nav.pushUrl(effect.payload);
     }
-    case 'GetDecrement': {
-      return function (done) {
-        const ref = setTimeout(
-          () => done(msg.GotDecrement(Math.round(Math.random() * 100))),
-          1000,
-        );
-        return {
-          dispose: () => {
-            clearTimeout(ref);
-          },
-        };
-      };
+    case 'NavLoad': {
+      return Nav.load(effect.payload);
+    }
+    case 'GetUserRepos': {
+      return ReposPage.effects(effect);
     }
   }
+};
+
+// SUBSCRIPTIONS
+
+export const subscriptions = (_: Model): Subscription.Sub<Msg> => {
+  return { ...Nav.subscriptions(msg.LinkClicked, msg.UrlChanged) };
 };
 
 // VIEW
 
 export const view = (model: Model): Html.Html<Msg> => {
   return Html.div(
-    [Html.className('border-1 padding-xl')],
+    [Html.className('container border padding-lg flex-column gap-lg')],
     [
-      Html.h2([], [Html.text('Advanced')]),
+      Html.h3([], [Html.text('SPA')]),
+      Html.span([], [Html.text('Url: ' + model.url)]),
       Html.div(
-        [Html.classNames(['flex-column', model.loading && 'loading'])],
+        [Html.className('flex gap-lg')],
         [
-          Html.button(
-            [Html.onClick(msg.GetIncrement())],
-            [Html.text('Get increment')],
-          ),
-          Html.button(
-            [Html.onClick(msg.GetDecrement())],
-            [Html.text('Get decrement')],
-          ),
+          sidebar([
+            ['', 'Internal'],
+            ['/', 'Home'],
+            ['/cats', 'Cats'],
+            ['/repos', 'Repos'],
+            ['/aaaaa', 'Not found'],
+            ['', 'External'],
+            ['https://elm-lang.org/', 'Elm'],
+            ['https://www.typescriptlang.org/', 'Typescript'],
+          ]),
+          pageContent(model),
         ],
       ),
-      Html.div(
-        [],
-        [
-          Html.button(
-            [Html.onClick(msg.Increment())],
-            [Html.text('+' + model.increment)],
-          ),
-          Html.button(
-            [Html.onClick(msg.Decrement())],
-            [Html.text('-' + model.decrement)],
-          ),
-        ],
-      ),
-      Html.div([], [Html.text('Count: ' + model.count)]),
     ],
   );
 };
+
+function sidebar(links: [string, string][]): Html.Html<Msg> {
+  return Html.nav(
+    [Html.className('flex-column gap-sm padding-r-md border-r')],
+    links.map(([href, label]) =>
+      href
+        ? Html.a([Html.attr('href', href)], [Html.text(label)])
+        : Html.h4([], [Html.text(label)]),
+    ),
+  );
+}
+
+function pageContent(model: Model): Html.Html<Msg> {
+  const url = new URL(model.url);
+  switch (url.pathname) {
+    case '/':
+      return Html.div(
+        [],
+        [
+          Html.h1([], [Html.text('Home')]),
+          Html.div(
+            [],
+            [
+              Html.text(
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit vehicula massa nec volutpat. In eget varius ante, ' +
+                  'non consequat nunc. Curabitur euismod, mauris in elementum porttitor, enim ante dapibus mi, non tempus enim lorem vitae magna. ' +
+                  'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin in turpis nisl. Sed nec est ut augue fermentum aliquet.',
+              ),
+            ],
+          ),
+        ],
+      );
+    case '/repos':
+      return Html.div([], [Html.h1([], [Html.text('Repos')])]);
+    case '/repo':
+      return Html.div([], [Html.h1([], [Html.text('Repo')])]);
+    case '/cats':
+      return Html.div(
+        [],
+        [
+          Html.h1([], [Html.text('Cats')]),
+          Html.img(
+            [
+              Html.className('image-frame'),
+              Html.attr('src', 'https://cataas.com/cat'),
+            ],
+            [],
+          ),
+        ],
+      );
+  }
+  return NotFoundPage.view(url.pathname);
+}

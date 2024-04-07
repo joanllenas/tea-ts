@@ -12,9 +12,13 @@ import * as Html from './html';
 import * as Effect from './effect';
 import * as Subscription from './subscription';
 
-type Scheduler<Msg> = {
+interface SimpleScheduler<Msg> {
   queue: (msg: Msg) => void;
-};
+}
+
+interface AdvancedScheduler<Msg> extends SimpleScheduler<Msg> {
+  startSubscriptions: () => void;
+}
 
 // ----------------------------
 // VDOM
@@ -30,7 +34,7 @@ const patch = init([
 function html2vnode<Model, Msg>(
   html: Html.Html<Msg>,
   model: Model,
-  scheduler: Scheduler<Msg>,
+  scheduler: SimpleScheduler<Msg>,
 ): VNode {
   if (html.type === 'Text') {
     return h('span', html.text);
@@ -48,8 +52,8 @@ function html2vnode<Model, Msg>(
       return null;
     }
     if (Html.isEvent(cur)) {
-      nodeData.on![cur.name] = () => {
-        scheduler.queue(cur.msg);
+      nodeData.on![cur.name] = (evt: Event) => {
+        scheduler.queue(cur.msg(evt));
       };
     } else if (Html.isAttr(cur)) {
       nodeData.attrs![cur.name] = cur.value;
@@ -80,7 +84,7 @@ export function simple<Model, Msg>(
       if (node) {
         let vnode = patch(node, h('initial'));
         let model = init();
-        const scheduler: Scheduler<Msg> = initScheduler();
+        const scheduler: SimpleScheduler<Msg> = initScheduler();
         let raf = render();
 
         function render() {
@@ -130,7 +134,8 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
         const runningSubs = new Map<string, () => void>();
         const runningEffects = new Map<string, () => void>();
         let [model, effect] = init(flags);
-        const scheduler: Scheduler<Msg> = initScheduler();
+        const scheduler: AdvancedScheduler<Msg> = initScheduler();
+        scheduler.startSubscriptions();
         let raf = render();
 
         function render() {
@@ -142,6 +147,16 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
 
         function initScheduler() {
           return {
+            startSubscriptions: () => {
+              const newSubs = subscriptions(model);
+              for (let key in newSubs) {
+                const send = (msg: Msg) => {
+                  scheduler.queue(msg);
+                };
+                const initSubFn = newSubs[key];
+                runningSubs.set(key, initSubFn(send).dispose);
+              }
+            },
             queue: (msg: Msg) => {
               window.cancelAnimationFrame(raf);
               [model, effect] = update(msg, model);
@@ -152,9 +167,14 @@ export function advanced<Model, Msg, Eff extends Effect.Eff<string>, Flags>(
 
               // TODO: handle batched effects
               const effectFn = effects(effect);
-              const done = (msg: Msg) => {
-                runningEffects.delete(effect.name);
-                scheduler.queue(msg);
+              const done: Effect.Done<Msg> = {
+                withMessage: (msg: Msg) => {
+                  runningEffects.delete(effect.name);
+                  scheduler.queue(msg);
+                },
+                withoutMessage: () => {
+                  runningEffects.delete(effect.name);
+                },
               };
               if (runningEffects.has(effect.name)) {
                 const disposeFn = runningEffects.get(effect.name)!;

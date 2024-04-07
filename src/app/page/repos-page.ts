@@ -1,8 +1,8 @@
-import * as Message from '../tea/message';
-import * as Effect from '../tea/effect';
-import * as Html from '../tea/html';
-import * as Github from './github';
-import * as RemoteData from '../lib/remote-data';
+import * as Message from '../../tea/message';
+import * as Effect from '../../tea/effect';
+import * as Html from '../../tea/html';
+import * as Github from '../github';
+import * as RemoteData from '../../lib/remote-data';
 
 // Model
 
@@ -23,12 +23,12 @@ export const init = (): [Model, Eff] => [
 
 // UPDATE
 
-type Msg =
+export type Msg =
   | Message.Msg<'UserChangedUsername', string>
   | Message.Msg<'UserRequestedRepos'>
   | Message.Msg<'BackendReturnedRepos', Github.UserRepos>;
 
-const msg: Message.MsgRecord<Msg> = {
+export const msg: Message.MsgRecord<Msg> = {
   UserChangedUsername: (username: string) =>
     Message.msg('UserChangedUsername', username),
   UserRequestedRepos: () => Message.msg('UserRequestedRepos'),
@@ -42,7 +42,10 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
       return [{ ...model, username: msg.payload }, Effect.none];
     }
     case 'UserRequestedRepos': {
-      return [{ ...model, repos: RemoteData.loading() }, eff.GetUserRepos()];
+      return [
+        { ...model, repos: RemoteData.loading() },
+        eff.GetUserRepos(model.username),
+      ];
     }
     case 'BackendReturnedRepos': {
       return [{ ...model, repos: msg.payload }, Effect.none];
@@ -52,9 +55,9 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
 
 // EFFECTS
 
-type Eff = Effect.None | Effect.Eff<'GetUserRepos', string>;
+export type Eff = Effect.None | Effect.Eff<'GetUserRepos', string>;
 
-const eff: Effect.EffRecord<Eff> = {
+export const eff: Effect.EffRecord<Eff> = {
   None: () => Effect.none,
   GetUserRepos: (username: string) => Effect.eff('GetUserRepos', username),
 };
@@ -67,7 +70,7 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
     case 'GetUserRepos': {
       return function (done) {
         Github.getUserRepos(effect.payload).then((result) => {
-          done(msg.BackendReturnedRepos(result));
+          done.withMessage(msg.BackendReturnedRepos(result));
         });
         return {
           dispose: () => {},
@@ -91,11 +94,20 @@ export const view = (model: Model): Html.Html<Msg> => {
             [],
             [
               Html.text('Username'),
-              Html.input([Html.onInput(msg.UserChangedUsername())], []),
+              Html.input(
+                [
+                  Html.onInput((evt) =>
+                    msg.UserChangedUsername(
+                      (evt.target as HTMLInputElement).value,
+                    ),
+                  ),
+                ],
+                [],
+              ),
             ],
           ),
           Html.button(
-            [Html.onClick(msg.UserRequestedRepos())],
+            [Html.onClick(() => msg.UserRequestedRepos())],
             [Html.text('Get decrement')],
           ),
         ],

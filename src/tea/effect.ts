@@ -1,6 +1,11 @@
 export type Disposable = { dispose: () => void };
+export type Done<Msg> = {
+  withMessage: (msg: Msg) => void;
+  withoutMessage: () => void;
+};
 
-export type EffectFn<Msg> = (done: (msg: Msg) => void) => Disposable;
+// TODO: refactor and use Promise<Msg> instead, so we don't have to handle done() explicitly?
+export type EffectFn<Msg> = (done: Done<Msg>) => Disposable;
 
 // Effect type constructor
 

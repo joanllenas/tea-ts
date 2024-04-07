@@ -5,7 +5,11 @@ export type Attr = {
   name: string;
   value: string | number | boolean;
 };
-export type Evt<Msg> = { type: 'Evt'; name: string; msg: Msg };
+export type Evt<Msg> = {
+  type: 'Evt';
+  name: string;
+  msg: (event: Event) => Msg;
+};
 export type Attribute<Msg> = Attr | Evt<Msg>;
 export type Html<Msg> =
   | {
@@ -48,6 +52,7 @@ export function node<Msg>(
 }
 export const div = createTagFunction('div');
 export const span = createTagFunction('span');
+export const nav = createTagFunction('nav');
 export const h1 = createTagFunction('h1');
 export const h2 = createTagFunction('h2');
 export const h3 = createTagFunction('h3');
@@ -56,7 +61,9 @@ export const h5 = createTagFunction('h5');
 export const h6 = createTagFunction('h6');
 export const button = createTagFunction('button');
 export const input = createTagFunction('input');
+export const img = createTagFunction('img');
 export const label = createTagFunction('label');
+export const a = createTagFunction('a');
 
 // HTML Attribute factory functions
 
@@ -90,12 +97,15 @@ export const classNames = <Msg>(classes: (string | undefined | false)[]) =>
 // HTML Event factory functions
 
 function createEvtFunction(name: string) {
-  return function <Msg>(msg: Msg): Attribute<Msg> {
+  return function <Msg>(msg: (event: Event) => Msg): Attribute<Msg> {
     return on(name, msg);
   };
 }
 
-export function on<Msg>(name: string, msg: Msg): Attribute<Msg> {
+export function on<Msg>(
+  name: string,
+  msg: (event: Event) => Msg,
+): Attribute<Msg> {
   return {
     type: 'Evt',
     name,
@@ -104,7 +114,7 @@ export function on<Msg>(name: string, msg: Msg): Attribute<Msg> {
 }
 
 export function noEvt<Msg>(): Attribute<Msg> {
-  return { type: 'Evt', name: '', msg: null as Msg };
+  return { type: 'Evt', name: '', msg: () => null as Msg };
 }
 
 export const onClick = createEvtFunction('click');

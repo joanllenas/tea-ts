@@ -30,11 +30,11 @@ export const update = (msg: Msg, model: Model): Model => {
 
 export const view = (model: Model): Html.Html<Msg> => {
   return Html.div(
-    [Html.className('border-1 padding-lg')],
+    [Html.className('border padding-lg')],
     [
       Html.h3([], [Html.text('Simple')]),
-      Html.button([Html.onClick(msg.Increment(2))], [Html.text('+')]),
-      Html.button([Html.onClick(msg.Decrement())], [Html.text('-')]),
+      Html.button([Html.onClick(() => msg.Increment(2))], [Html.text('+')]),
+      Html.button([Html.onClick(() => msg.Decrement())], [Html.text('-')]),
       Html.div([], [Html.text('Count: ' + model.count)]),
     ],
   );

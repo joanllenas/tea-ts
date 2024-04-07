@@ -6,7 +6,19 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  font-size: x-large;
+  font-size: large;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin: 0;
+}
+
+.flex {
+  display: flex;
 }
 
 .flex-column {
@@ -14,8 +26,28 @@ body {
   flex-direction: column;
 }
 
-.border-1 {
+.gap-sm {
+  gap: 4px;
+}
+
+.gap-md {
+  gap: 8px;
+}
+
+.gap-lg {
+  gap: 16px;
+}
+
+.gap-xl {
+  gap: 32px;
+}
+
+.border {
   border: 1px solid black;
+}
+
+.border-r {
+  border-right: 1px solid black;
 }
 
 .padding-sm {
@@ -23,6 +55,10 @@ body {
 }
 
 .padding-md {
+  padding: 8px;
+}
+
+.padding-r-md {
   padding: 8px;
 }
 
@@ -34,7 +70,19 @@ body {
   padding: 32px;
 }
 
+.container {
+  width: 500px;
+}
+
 .loading * {
   cursor: wait;
   color: gray;
+}
+
+.image-frame {
+  display: block;
+  max-width: 230px;
+  max-height: 230px;
+  width: auto;
+  height: auto;
 }

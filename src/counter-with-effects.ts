@@ -101,7 +101,8 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
     case 'GetIncrement': {
       return function (done) {
         const ref = setTimeout(
-          () => done(msg.GotIncrement(Math.round(Math.random() * 100))),
+          () =>
+            done.withMessage(msg.GotIncrement(Math.round(Math.random() * 100))),
           1000,
         );
         return {
@@ -114,7 +115,8 @@ export const effects = (effect: Eff): Effect.EffectFn<Msg> => {
     case 'GetDecrement': {
       return function (done) {
         const ref = setTimeout(
-          () => done(msg.GotDecrement(Math.round(Math.random() * 100))),
+          () =>
+            done.withMessage(msg.GotDecrement(Math.round(Math.random() * 100))),
           1000,
         );
         return {
@@ -151,7 +153,7 @@ export const subscriptions = (model: Model): Subscription.Sub<Msg> => {
 
 export const view = (model: Model): Html.Html<Msg> => {
   return Html.div(
-    [Html.className('border-1 padding-lg')],
+    [Html.className('border padding-lg')],
     [
       Html.h3([], [Html.text('Advanced')]),
       Html.div(
@@ -165,7 +167,7 @@ export const view = (model: Model): Html.Html<Msg> => {
                 [
                   Html.attr('type', 'checkbox'),
                   Html.attr('checked', model.autoincrement),
-                  Html.onChange(msg.ToggleAutoincrement()),
+                  Html.onChange(() => msg.ToggleAutoincrement()),
                 ],
                 [],
               ),
@@ -177,11 +179,11 @@ export const view = (model: Model): Html.Html<Msg> => {
         [Html.classNames(['flex-column', model.loading && 'loading'])],
         [
           Html.button(
-            [Html.onClick(msg.GetIncrement())],
+            [Html.onClick(() => msg.GetIncrement())],
             [Html.text('Get increment')],
           ),
           Html.button(
-            [Html.onClick(msg.GetDecrement())],
+            [Html.onClick(() => msg.GetDecrement())],
             [Html.text('Get decrement')],
           ),
         ],
@@ -190,11 +192,11 @@ export const view = (model: Model): Html.Html<Msg> => {
         [],
         [
           Html.button(
-            [Html.onClick(msg.Increment())],
+            [Html.onClick(() => msg.Increment())],
             [Html.text('+' + model.increment)],
           ),
           Html.button(
-            [Html.onClick(msg.Decrement())],
+            [Html.onClick(() => msg.Decrement())],
             [Html.text('-' + model.decrement)],
           ),
         ],
