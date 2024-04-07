@@ -8,6 +8,8 @@ export type Attr = {
 export type Evt<Msg> = {
   type: 'Evt';
   name: string;
+  stopPropagation: boolean;
+  preventDefault: boolean;
   msg: (event: Event) => Msg;
 };
 export type Attribute<Msg> = Attr | Evt<Msg>;
@@ -59,10 +61,13 @@ export const h3 = createTagFunction('h3');
 export const h4 = createTagFunction('h4');
 export const h5 = createTagFunction('h5');
 export const h6 = createTagFunction('h6');
+export const ul = createTagFunction('ul');
+export const li = createTagFunction('li');
 export const button = createTagFunction('button');
+export const form = createTagFunction('form');
+export const label = createTagFunction('label');
 export const input = createTagFunction('input');
 export const img = createTagFunction('img');
-export const label = createTagFunction('label');
 export const a = createTagFunction('a');
 
 // HTML Attribute factory functions
@@ -109,17 +114,50 @@ export function on<Msg>(
   return {
     type: 'Evt',
     name,
+    stopPropagation: false,
+    preventDefault: false,
     msg,
   };
 }
 
+export function stopPropagationOn(name: string) {
+  return function <Msg>(msg: (event: Event) => Msg): Attribute<Msg> {
+    return {
+      type: 'Evt',
+      name,
+      stopPropagation: true,
+      preventDefault: false,
+      msg,
+    };
+  };
+}
+
+export function preventDefaultOn(name: string) {
+  return function <Msg>(msg: (event: Event) => Msg): Attribute<Msg> {
+    return {
+      type: 'Evt',
+      name,
+      stopPropagation: false,
+      preventDefault: true,
+      msg,
+    };
+  };
+}
+
 export function noEvt<Msg>(): Attribute<Msg> {
-  return { type: 'Evt', name: '', msg: () => null as Msg };
+  return {
+    type: 'Evt',
+    name: '',
+    stopPropagation: false,
+    preventDefault: false,
+    msg: () => null as Msg,
+  };
 }
 
 export const onClick = createEvtFunction('click');
 export const onChange = createEvtFunction('change');
-export const onInput = createEvtFunction('input');
+export const onInput = stopPropagationOn('input');
+export const onSubmit = preventDefaultOn('submit');
 
 // Utils
 

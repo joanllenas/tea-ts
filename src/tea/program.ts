@@ -53,6 +53,12 @@ function html2vnode<Model, Msg>(
     }
     if (Html.isEvent(cur)) {
       nodeData.on![cur.name] = (evt: Event) => {
+        if (cur.preventDefault) {
+          evt.preventDefault();
+        }
+        if (cur.stopPropagation) {
+          evt.stopPropagation();
+        }
         scheduler.queue(cur.msg(evt));
       };
     } else if (Html.isAttr(cur)) {

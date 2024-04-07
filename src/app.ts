@@ -79,7 +79,7 @@ type Eff = Effect.None | Nav.Effects | ReposPage.Eff;
 
 const eff: Effect.EffRecord<Eff> = {
   //None: () => Effect.none,
-  ...Nav.effects(),
+  ...Nav.eff,
   ...ReposPage.eff,
 };
 
@@ -153,22 +153,9 @@ function pageContent(model: Model): Html.Html<Msg> {
         [],
         [
           Html.h1([], [Html.text('Home')]),
-          Html.div(
-            [],
-            [
-              Html.text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit vehicula massa nec volutpat. In eget varius ante, ' +
-                  'non consequat nunc. Curabitur euismod, mauris in elementum porttitor, enim ante dapibus mi, non tempus enim lorem vitae magna. ' +
-                  'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin in turpis nisl. Sed nec est ut augue fermentum aliquet.',
-              ),
-            ],
-          ),
+          Html.div([], [Html.text('Lorem ipsum dolor sit amet, '.repeat(10))]),
         ],
       );
-    case '/repos':
-      return Html.div([], [Html.h1([], [Html.text('Repos')])]);
-    case '/repo':
-      return Html.div([], [Html.h1([], [Html.text('Repo')])]);
     case '/cats':
       return Html.div(
         [],
@@ -183,6 +170,10 @@ function pageContent(model: Model): Html.Html<Msg> {
           ),
         ],
       );
+    case '/repos':
+      return ReposPage.view(model.repos);
+    case '/repo':
+      return Html.div([], [Html.h1([], [Html.text('Repo')])]);
   }
   return NotFoundPage.view(url.pathname);
 }

@@ -25,12 +25,10 @@ export type Effects =
 
 // Nav Effect type constructors
 
-export function effects(): Effect.EffRecord<Effects> {
-  return {
-    NavPushUrl: (url) => Effect.eff('NavPushUrl', url),
-    NavLoad: (url) => Effect.eff('NavLoad', url),
-  };
-}
+export const eff: Effect.EffRecord<Effects> = {
+  NavPushUrl: (url) => Effect.eff('NavPushUrl', url),
+  NavLoad: (url) => Effect.eff('NavLoad', url),
+};
 
 // Nav Effect functions
 

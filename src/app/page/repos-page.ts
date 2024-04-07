@@ -87,8 +87,11 @@ export const view = (model: Model): Html.Html<Msg> => {
     [Html.className('border-1 padding-xl')],
     [
       Html.h2([], [Html.text('Github user repos')]),
-      Html.div(
-        [Html.classNames(['flex-column'])],
+      Html.form(
+        [
+          Html.classNames(['flex-column']),
+          Html.onSubmit(() => msg.UserRequestedRepos()),
+        ],
         [
           Html.label(
             [],
@@ -96,6 +99,7 @@ export const view = (model: Model): Html.Html<Msg> => {
               Html.text('Username'),
               Html.input(
                 [
+                  Html.attr('value', model.username),
                   Html.onInput((evt) =>
                     msg.UserChangedUsername(
                       (evt.target as HTMLInputElement).value,
@@ -107,12 +111,33 @@ export const view = (model: Model): Html.Html<Msg> => {
             ],
           ),
           Html.button(
-            [Html.onClick(() => msg.UserRequestedRepos())],
-            [Html.text('Get decrement')],
+            [Html.attr('disabled', model.username === '')],
+            [Html.text('Get repos')],
           ),
         ],
       ),
-      Html.div([], [Html.text('Repos: ' + model.repos.type)]),
+      RemoteData.isSuccess(model.repos)
+        ? viewRepos(model.repos.value)
+        : RemoteData.isLoading(model.repos)
+          ? Html.div([], [Html.text(`Loading ${model.username}'s repos`)])
+          : RemoteData.isFailure(model.repos)
+            ? Html.div(
+                [],
+                [Html.text(`There has been an error: ${model.repos.error}.`)],
+              )
+            : Html.div([], [Html.text('Type a username and hit "Get repos"')]),
     ],
   );
 };
+
+function viewRepos(repos: Github.GithubRepo[]): Html.Html<Msg> {
+  return Html.ul(
+    [],
+    repos.map((repo) => {
+      return Html.li(
+        [],
+        [Html.a([Html.attr('href', repo.html_url)], [Html.text(repo.name)])],
+      );
+    }),
+  );
+}
