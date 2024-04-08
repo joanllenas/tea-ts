@@ -32,7 +32,7 @@ export const init = (flags: { url: string }): [Model, Eff] => {
       repo: repoModel,
     },
     Effect.none,
-    //Effect.batch([reposEffects, repoEffects]),
+    //TODO: Effect.batch([reposEffects, repoEffects]),
   ];
 };
 
@@ -80,6 +80,7 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
 type Eff = Effect.None | Nav.Effects | ReposPage.Eff;
 
 const eff: Effect.EffRecord<Eff> = {
+  // TODO: deduplicate None
   //None: () => Effect.none,
   ...Nav.eff,
   ...ReposPage.eff,
