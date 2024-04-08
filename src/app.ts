@@ -51,6 +51,7 @@ const msg: Message.MsgRecord<Msg> = {
 
 export const update = (msg: Msg, model: Model): [Model, Eff] => {
   switch (msg.name) {
+    // Navigation messages
     case 'LinkClicked': {
       if (Nav.isInternal(msg.payload)) {
         return [
@@ -64,6 +65,7 @@ export const update = (msg: Msg, model: Model): [Model, Eff] => {
       let eff = Effect.none;
       return [{ ...model, url: msg.payload }, eff];
     }
+    // Repos page messages
     case 'UserRequestedRepos':
     case 'BackendReturnedRepos':
     case 'UserChangedUsername': {
