@@ -5,7 +5,7 @@ An experimental port of [The Elm Architecture](https://guide.elm-lang.org/archit
 ## Program
 
 ```ts
-// Pure Program
+// Simple Program
 function simple<Model, Msg>(
   init: () => Model,
   update: (msg: Msg, model: Model) => Model,
