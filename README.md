@@ -1,19 +1,19 @@
 # Tea-ts
 
-An experimental port of the Elm architecture to Typescript.
+An experimental port of [The Elm Architecture](https://guide.elm-lang.org/architecture/) to Typescript.
 
 ## Program
 
 ```ts
 // Pure Program
-simple<Model, Msg>(
+function simple<Model, Msg>(
   init: () => Model,
   update: (msg: Msg, model: Model) => Model,
   view: (model: Model) => Html.Html<Msg>,
 );
 
 // Program with managed effects
-advanced<Model, Msg, Eff, Flags>(
+function advanced<Model, Msg, Eff, Flags>(
   init: (flags: Flags) => [Model, Eff],
   update: (msg: Msg, model: Model) => [Model, Eff],
   effects: (eff: Eff) => Effect.EffectFn<Msg>,
@@ -40,11 +40,11 @@ const msg: Message.MsgRecord<Msg> = {
   Decrement: () => Message.msg('Decrement'),
 };
 
-export const init = (): Model => ({
+const init = (): Model => ({
   count: 0,
 });
 
-export const update = (msg: Msg, model: Model): Model => {
+const update = (msg: Msg, model: Model): Model => {
   switch (msg.name) {
     case 'Increment': {
       return { count: model.count + msg.payload };
@@ -55,7 +55,7 @@ export const update = (msg: Msg, model: Model): Model => {
   }
 };
 
-export const view = (model: Model): Html.Html<Msg> => {
+const view = (model: Model): Html.Html<Msg> => {
   return Html.div(
     [],
     [
