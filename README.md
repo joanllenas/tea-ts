@@ -2,6 +2,11 @@
 
 An experimental port of [The Elm Architecture](https://guide.elm-lang.org/architecture/) to Typescript.
 
+_(Work-in-progress)_
+
+> [!NOTE]
+> This project is highly experimental and adheres to Elm’s conventions, so it might appear quite unidiomatic in TypeScript. My goal is to explore the extent to which I can emulate Elm’s native guarantees, specifically by treating interactions and effects as data and aiming for functional purity, all while providing full type safety and optimal type inference.
+
 ## Program
 
 ```ts
